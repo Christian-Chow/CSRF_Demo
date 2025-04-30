@@ -35,6 +35,24 @@ app.post("/process", csrfProtection, (req, res) => {
   res.send(`Form data received safely: ${req.body.data}`);
 });
 
+// Serve a form that submits to the vulnerable endpoint
+app.get('/vulnerable-form', (req, res) => {
+  res.send(`
+    <h1>Vulnerable CSRF Form</h1>
+    <form action="/vulnerable-process" method="POST">
+      <label>Enter something: <input type="text" name="data"></label>
+      <button type="submit">Submit</button>
+    </form>
+  `);
+});
+
+// Vulnerable POST endpoint without CSRF protection
+app.post('/vulnerable-process', (req, res) => {
+  res.send(`Vulnerable form data received: ${req.body.data}`);
+});
+
+
+
 // Start the server
 app.listen(port, () => {
   console.log(`CSRF demo app listening at http://localhost:${port}/form`);
