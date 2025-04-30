@@ -73,34 +73,7 @@ app.get("/bank", (req, res) => {
     <a href="/logout">Logout</a><br><br>
     <a href="/transfer-form">Transfer Funds (Vulnerable)</a>
 
-    <!-- Popup Advertisement -->
-    <div id="popup" style="
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      background-color: white;
-      border: 1px solid black;
-      padding: 20px;
-      z-index: 1000;
-      text-align: center;
-    ">
-      <h2>🎉 Congratulations! 🎉</h2>
-      <p>You've been selected for a special offer!</p>
-      <a href="/attack.html">Claim Your Free Gift Card!</a>
-      <button onclick="closePopup()">Close</button>
-    </div>
-
-    <script>
-      function closePopup() {
-        document.getElementById('popup').style.display = 'none';
-      }
-    </script>
-    <style>
-    #popup {
-      display: block; /* Initially show the popup */
-    }
-    </style>
+    
   `;
 
   res.send(bankPageHtml);
@@ -122,20 +95,69 @@ app.listen(port, () => {
   console.log(`CSRF bank demo app listening at http://localhost:${port}`);
 });
 
+let comments = []; // Store comments in memory (for this example)
+
 // Vulnerable transfer form
 app.get("/transfer-form", (req, res) => {
   if (!req.session.user) {
     return res.redirect("/login");
   }
 
-  res.send(`
+  let html = `
     <h1>Transfer Funds (Vulnerable)</h1>
     <p>Logged in as: ${req.session.user}</p>
     <form action="/transfer" method="POST">
       <label>Amount to Transfer: <input type="number" name="amount" value="1000"></label><br>
       <button type="submit">Transfer</button>
     </form>
-  `);
+
+    <head>
+      <title>Vulnerable Comment Section (JavaScript)</title>
+    </head>
+    <body>
+      <h1>Transfer Message</h1>
+
+      <form method="post" action="/comment-success">
+        <textarea name="comment"></textarea><br>
+        <input type="submit" value="Submit">
+      </form>
+
+      <h2>Transfer history:</h2>
+  `;
+  // Vulnerable: Displaying comments without encoding/sanitization
+  // Vulnerable: Displaying comments with date and transfer amount
+  comments.forEach((entry) => {
+    html += `<p>Date: ${entry.date}, Amount: ${entry.amount}, Comment: ${entry.comment}</p>`; // Directly inserting user input
+  });
+
+  // Display comments, encoding them to prevent XSS
+  // comments.forEach((comment) => {
+  //   const safeComment = sanitizeHtml(comment, {
+  //     allowedTags: [], // Disallow all tags
+  //     allowedAttributes: {}, // Disallow all attributes
+  //   });
+  //   html += `<p>${safeComment}</p>`;
+  // });
+
+  html += `
+    </body>
+    </html>
+  `;
+
+  res.send(html);
+});
+app.post("/comment-success", (req, res) => {
+  const comment = req.body.comment;
+  const now = new Date();
+  const dateString = now.toLocaleDateString() + " " + now.toLocaleTimeString();
+
+  comments.push({
+    date: dateString,
+    amount: transferAmount,
+    comment: comment,
+  }); // Store the comment, date, and amount
+
+  res.redirect("/transfer-form"); // Redirect back to the home page
 });
 
 // Vulnerable transfer processing route (NO CSRF PROTECTION)
@@ -162,52 +184,31 @@ app.post("/transfer", (req, res) => {
   }
 });
 
-let comments = []; // Store comments in memory (for this example)
+// <!-- Popup Advertisement -->
+//     <div id="popup" style="
+//       position: fixed;
+//       top: 50%;
+//       left: 50%;
+//       transform: translate(-50%, -50%);
+//       background-color: white;
+//       border: 1px solid black;
+//       padding: 20px;
+//       z-index: 1000;
+//       text-align: center;
+//     ">
+//       <h2>🎉 Congratulations! 🎉</h2>
+//       <p>You've been selected for a special offer!</p>
+//       <a href="/attack.html">Claim Your Free Gift Card!</a>
+//       <button onclick="closePopup()">Close</button>
+//     </div>
 
-app.get("/comment", (req, res) => {
-  // Generate the HTML dynamically with comments
-  let html = `
-    <!DOCTYPE html>
-    <html>
-    <head>
-      <title>Vulnerable Comment Section (JavaScript)</title>
-    </head>
-    <body>
-      <h1>Leave a Comment</h1>
-
-      <form method="post" action="/comment-success">
-        <textarea name="comment"></textarea><br>
-        <input type="submit" value="Submit">
-      </form>
-
-      <h2>Comments:</h2>
-  `;
-
-  // Display comments, encoding them to prevent XSS
-  // comments.forEach((comment) => {
-  //   const safeComment = sanitizeHtml(comment, {
-  //     allowedTags: [], // Disallow all tags
-  //     allowedAttributes: {}, // Disallow all attributes
-  //   });
-  //   html += `<p>${safeComment}</p>`;
-  // });
-
-  // Vulnerable: Displaying comments without encoding/sanitization
-  comments.forEach((comment) => {
-    html += `<p>${comment}</p>`; // Directly inserting user input
-  });
-
-  html += `
-    </body>
-    </html>
-  `;
-
-  res.send(html);
-});
-
-app.post("/comment-success", (req, res) => {
-  const comment = req.body.comment;
-  comments.push(comment); // Store the comment
-
-  res.redirect("/comment"); // Redirect back to the home page
-});
+//     <script>
+//       function closePopup() {
+//         document.getElementById('popup').style.display = 'none';
+//       }
+//     </script>
+//     <style>
+//     #popup {
+//       display: block; /* Initially show the popup */
+//     }
+//     </style>
