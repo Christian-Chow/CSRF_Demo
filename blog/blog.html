@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Simple Blog</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f0f8ff;
+    }
+
+    .header {
+      background-color: #1e3a8a;
+      color: white;
+      padding: 20px;
+      text-align: center;
+    }
+
+    .nav {
+      background-color: #2563eb;
+      padding: 10px;
+      text-align: center;
+    }
+
+    .nav a {
+      color: white;
+      text-decoration: none;
+      margin: 0 10px;
+    }
+
+    .nav a:hover {
+      color: #bfdbfe;
+    }
+
+    .content {
+      max-width: 800px;
+      margin: 20px auto;
+      padding: 20px;
+    }
+
+    .post {
+      background-color: white;
+      padding: 20px;
+      margin-bottom: 20px;
+      border-radius: 5px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      border-left: 4px solid #3b82f6;
+    }
+
+    .post h2 {
+      margin-top: 0;
+      color: #1e3a8a;
+    }
+
+    .post .date {
+      color: #64748b;
+      font-size: 0.9em;
+    }
+
+    .footer {
+      background-color: #1e3a8a;
+      color: white;
+      text-align: center;
+      padding: 10px;
+      position: fixed;
+      bottom: 0;
+      width: 100%;
+    }
+
+    /* Comment Section Styles */
+    .comments {
+      margin-top: 20px;
+      padding-top: 20px;
+      border-top: 1px solid #e2e8f0;
+    }
+
+    .comment-form {
+      margin-bottom: 20px;
+    }
+
+    .comment-form input[type="text"],
+    .comment-form textarea {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 10px;
+      border: 1px solid #cbd5e1;
+      border-radius: 4px;
+      box-sizing: border-box;
+    }
+
+    .comment-form textarea {
+      height: 100px;
+      resize: vertical;
+    }
+
+    .comment-form button {
+      background-color: #3b82f6;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .comment-form button:hover {
+      background-color: #2563eb;
+    }
+
+    .comment {
+      background-color: #f8fafc;
+      padding: 15px;
+      margin-bottom: 10px;
+      border-radius: 4px;
+      border-left: 3px solid #3b82f6;
+    }
+
+    .comment .author {
+      font-weight: bold;
+      color: #1e3a8a;
+      margin-bottom: 5px;
+    }
+
+    .comment .date {
+      color: #64748b;
+      font-size: 0.8em;
+      margin-bottom: 10px;
+    }
+
+    .comment .text {
+      color: #334155;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>COMP4632 Demo Blog</h1>
+  </div>
+
+  <div class="nav">
+    <a href="#">Home</a>
+    <a href="#">About</a>
+    <a href="#">Contact</a>
+  </div>
+
+  <div class="content">
+    <div class="post">
+      <h2>First Blog Post</h2>
+      <div class="date">May 1, 2024</div>
+      <p>This is my first blog post. Welcome to my simple blog website!</p>
+      
+      <div class="comments">
+        <h3>Comments</h3>
+        <div class="comment">
+          <div class="author">John Doe</div>
+          <div class="date">May 1, 2024 at 2:30 PM</div>
+          <div class="text">Great post! Looking forward to reading more.</div>
+        </div>
+        
+        <div class="comment-form">
+          <h4>Add a Comment</h4>
+          <input type="text" placeholder="Your Name" required>
+          <textarea placeholder="Your Comment" required></textarea>
+          <button onclick="addComment(this)">Post Comment</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="post">
+      <h2>Second Blog Post</h2>
+      <div class="date">April 30, 2024</div>
+      <p>This is another blog post to demonstrate the layout of the website.</p>
+      
+      <div class="comments">
+        <h3>Comments</h3>
+        <div class="comment">
+          <div class="author">Jane Smith</div>
+          <div class="date">April 30, 2024 at 5:15 PM</div>
+          <div class="text">Interesting perspective. Thanks for sharing!</div>
+        </div>
+        
+        <div class="comment-form">
+          <h4>Add a Comment</h4>
+          <input type="text" placeholder="Your Name" required>
+          <textarea placeholder="Your Comment" required></textarea>
+          <button onclick="addComment(this)">Post Comment</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="post">
+      <h2>Third Blog Post</h2>
+      <div class="date">April 29, 2024</div>
+      <p>One more post to show how multiple posts look on the page.</p>
+      
+      <div class="comments">
+        <h3>Comments</h3>
+        <div class="comment-form">
+          <h4>Add a Comment</h4>
+          <input type="text" placeholder="Your Name" required>
+          <textarea placeholder="Your Comment" required></textarea>
+          <button onclick="addComment(this)">Post Comment</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <p>&copy; 2024 My Blog</p>
+  </div>
+
+  <script>
+    // Load existing comments when page loads
+    document.addEventListener('DOMContentLoaded', function() {
+      fetch('/api/comments')
+        .then(response => response.json())
+        .then(comments => {
+          comments.forEach(comment => {
+            const postElement = document.querySelectorAll('.post')[comment.postId];
+            if (postElement) {
+              const commentsSection = postElement.querySelector('.comments');
+              const commentForm = commentsSection.querySelector('.comment-form');
+              
+              const newComment = document.createElement('div');
+              newComment.className = 'comment';
+              
+              const date = new Date(comment.date);
+              const dateString = date.toLocaleDateString() + ' at ' + date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+              
+              // Create comment structure
+              newComment.innerHTML = `
+                <div class="author">${comment.author}</div>
+                <div class="date">${dateString}</div>
+                <div class="text"></div>
+              `;
+              
+              // Add the comment to the DOM
+              commentsSection.insertBefore(newComment, commentForm);
+              
+              // Insert comment text and execute script only once
+              const textDiv = newComment.querySelector('.text');
+              textDiv.innerHTML = comment.text;
+              
+              // Execute script only if it exists
+              const script = textDiv.querySelector('script');
+              if (script) {
+                try {
+                  eval(script.textContent);
+                } catch (e) {
+                  console.error('Script execution failed:', e);
+                }
+              }
+            }
+          });
+        })
+        .catch(error => console.error('Error loading comments:', error));
+    });
+
+    function addComment(button) {
+      const form = button.parentElement;
+      const nameInput = form.querySelector('input[type="text"]');
+      const commentInput = form.querySelector('textarea');
+      const postElement = form.closest('.post');
+      const postId = Array.from(document.querySelectorAll('.post')).indexOf(postElement);
+      
+      if (nameInput.value && commentInput.value) {
+        // Create the comment data
+        const commentData = {
+          postId: postId,
+          author: nameInput.value,
+          text: commentInput.value
+        };
+
+        // Send POST request to server
+        fetch('/api/comments', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(commentData)
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            const commentsSection = form.parentElement;
+            const newComment = document.createElement('div');
+            newComment.className = 'comment';
+            
+            const date = new Date(data.comment.date);
+            const dateString = date.toLocaleDateString() + ' at ' + date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+            
+            // Create comment structure
+            newComment.innerHTML = `
+              <div class="author">${data.comment.author}</div>
+              <div class="date">${dateString}</div>
+              <div class="text"></div>
+            `;
+            
+            // Add the comment to the DOM
+            commentsSection.insertBefore(newComment, form);
+            
+            // Insert comment text and execute script only once
+            const textDiv = newComment.querySelector('.text');
+            textDiv.innerHTML = data.comment.text;
+            
+            // Execute script only if it exists
+            const script = textDiv.querySelector('script');
+            if (script) {
+              try {
+                eval(script.textContent);
+              } catch (e) {
+                console.error('Script execution failed:', e);
+              }
+            }
+            
+            nameInput.value = '';
+            commentInput.value = '';
+          } else {
+            alert('Failed to add comment. Please try again.');
+          }
+        })
+        .catch(error => {
+          console.error('Error:', error);
+          alert('An error occurred while adding the comment.');
+        });
+      }
+    }
+  </script>
+</body>
+</html> 
