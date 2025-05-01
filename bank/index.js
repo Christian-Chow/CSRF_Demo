@@ -61,7 +61,7 @@ app.get("/logout", (req, res) => {
 
 // Bank page (requires login)
 app.get("/bank", (req, res) => {
-  if (!req.session.user) {
+  if (!req.session.user || !bankAccounts[req.session.user]) {
     return res.redirect("/login");
   }
 
@@ -72,49 +72,13 @@ app.get("/bank", (req, res) => {
     <p>Balance: $${bankAccounts[req.session.user].balance}</p>
     <a href="/logout">Logout</a><br><br>
     <a href="/transfer-form">Transfer Funds (Vulnerable)</a>
-
-    <!-- Popup Advertisement -->
-    <div id="popup" style="
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      background-color: white;
-      border: 1px solid black;
-      padding: 20px;
-      z-index: 1000;
-      text-align: center;
-    ">
-      <h2>🎉 Congratulations! 🎉</h2>
-      <p>You've been selected for a special offer!</p>
-      <a href="/attack.html">Claim Your Free Gift Card!</a>
-      <button onclick="closePopup()">Close</button>
-    </div>
-
-    <script>
-      function closePopup() {
-        document.getElementById('popup').style.display = 'none';
-      }
-    </script>
-    <style>
-    #popup {
-      display: block; /* Initially show the popup */
-    }
-    </style>
   `;
 
   res.send(bankPageHtml);
 });
 
 app.get("/", (req, res) => {
-  const filePath = path.join(__dirname, "public", "attack.html"); // Corrected path
-  fs.readFile(filePath, "utf8", (err, html) => {
-    if (err) {
-      console.error("Error reading HTML file:", err);
-      return res.status(500).send("Error serving the HTML");
-    }
-    res.send(html);
-  });
+  res.redirect("/login");
 });
 
 // Start the server
@@ -140,9 +104,9 @@ app.get("/transfer-form", (req, res) => {
 
 // Vulnerable transfer processing route (NO CSRF PROTECTION)
 app.post("/transfer", (req, res) => {
-  // if (!req.session.user) {
-  //   return res.redirect('/login');
-  // }
+  if (!req.session.user) {
+    return res.redirect('/login');
+  }
 
   const amount = parseInt(req.body.amount);
   if (amount > 0 && bankAccounts[req.session.user].balance >= amount) {
