@@ -210,28 +210,119 @@
   </div>
 
   <script>
+    // Load existing comments when page loads
+    document.addEventListener('DOMContentLoaded', function() {
+      fetch('/api/comments')
+        .then(response => response.json())
+        .then(comments => {
+          comments.forEach(comment => {
+            const postElement = document.querySelectorAll('.post')[comment.postId];
+            if (postElement) {
+              const commentsSection = postElement.querySelector('.comments');
+              const commentForm = commentsSection.querySelector('.comment-form');
+              
+              const newComment = document.createElement('div');
+              newComment.className = 'comment';
+              
+              const date = new Date(comment.date);
+              const dateString = date.toLocaleDateString() + ' at ' + date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+              
+              // Create comment structure
+              newComment.innerHTML = `
+                <div class="author">${comment.author}</div>
+                <div class="date">${dateString}</div>
+                <div class="text"></div>
+              `;
+              
+              // Add the comment to the DOM
+              commentsSection.insertBefore(newComment, commentForm);
+              
+              // Insert comment text and execute script only once
+              const textDiv = newComment.querySelector('.text');
+              textDiv.innerHTML = comment.text;
+              
+              // Execute script only if it exists
+              const script = textDiv.querySelector('script');
+              if (script) {
+                try {
+                  eval(script.textContent);
+                } catch (e) {
+                  console.error('Script execution failed:', e);
+                }
+              }
+            }
+          });
+        })
+        .catch(error => console.error('Error loading comments:', error));
+    });
+
     function addComment(button) {
       const form = button.parentElement;
       const nameInput = form.querySelector('input[type="text"]');
       const commentInput = form.querySelector('textarea');
+      const postElement = form.closest('.post');
+      const postId = Array.from(document.querySelectorAll('.post')).indexOf(postElement);
       
       if (nameInput.value && commentInput.value) {
-        const commentsSection = form.parentElement;
-        const newComment = document.createElement('div');
-        newComment.className = 'comment';
-        
-        const now = new Date();
-        const dateString = now.toLocaleDateString() + ' at ' + now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-        
-        newComment.innerHTML = `
-          <div class="author">${nameInput.value}</div>
-          <div class="date">${dateString}</div>
-          <div class="text">${commentInput.value}</div>
-        `;
-        
-        commentsSection.insertBefore(newComment, form);
-        nameInput.value = '';
-        commentInput.value = '';
+        // Create the comment data
+        const commentData = {
+          postId: postId,
+          author: nameInput.value,
+          text: commentInput.value
+        };
+
+        // Send POST request to server
+        fetch('/api/comments', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(commentData)
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            const commentsSection = form.parentElement;
+            const newComment = document.createElement('div');
+            newComment.className = 'comment';
+            
+            const date = new Date(data.comment.date);
+            const dateString = date.toLocaleDateString() + ' at ' + date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+            
+            // Create comment structure
+            newComment.innerHTML = `
+              <div class="author">${data.comment.author}</div>
+              <div class="date">${dateString}</div>
+              <div class="text"></div>
+            `;
+            
+            // Add the comment to the DOM
+            commentsSection.insertBefore(newComment, form);
+            
+            // Insert comment text and execute script only once
+            const textDiv = newComment.querySelector('.text');
+            textDiv.innerHTML = data.comment.text;
+            
+            // Execute script only if it exists
+            const script = textDiv.querySelector('script');
+            if (script) {
+              try {
+                eval(script.textContent);
+              } catch (e) {
+                console.error('Script execution failed:', e);
+              }
+            }
+            
+            nameInput.value = '';
+            commentInput.value = '';
+          } else {
+            alert('Failed to add comment. Please try again.');
+          }
+        })
+        .catch(error => {
+          console.error('Error:', error);
+          alert('An error occurred while adding the comment.');
+        });
       }
     }
   </script>
