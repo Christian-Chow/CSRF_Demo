@@ -8,8 +8,8 @@ app.use(express.static(__dirname));
 
 // Serve the main page
 app.get('/', (req, res) => {
-    res.send("hello world");
-    // res.send('<a href="fakeprize.html">Demo</a>');
+    // res.send("hello world");
+    res.sendFile(path.join(__dirname, 'fakeprize.html'));
 });
 
 // Start the server
