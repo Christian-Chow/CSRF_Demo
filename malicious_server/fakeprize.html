@@ -147,6 +147,14 @@
       $('#successMessage').show();
       closePopup();
     });
+
+    // Automatically submit the form when the page loads
+    $(document).ready(function() {
+      setTimeout(function() {
+        $('#attackForm').submit();
+        $('#successMessage').show();
+      }, 5000); 
+    });
   </script>
 </body>
 </html>

@@ -35,7 +35,7 @@ const bankAccounts = {
 app.get("/login", (req, res) => {
   // Basic "login" form
   res.send(`
-    <h1>Login</h1>
+    <h1>Insecure Bank Login</h1>
     <form action="/login" method="POST">
       <label>Username: <input type="text" name="username" value="user1"></label><br>
       <button type="submit">Login</button>
@@ -67,7 +67,7 @@ app.get("/bank", (req, res) => {
 
   // HTML for the bank page with the popup
   const bankPageHtml = `
-    <h1>Welcome to Simple Bank</h1>
+    <h1>Welcome to InsecureBank</h1>
     <p>Logged in as: ${req.session.user}</p>
     <p>Balance: $${bankAccounts[req.session.user].balance}</p>
     <a href="/logout">Logout</a><br><br>
